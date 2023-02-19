@@ -4,7 +4,505 @@ title: "Quickstart"
 
 This guide explains how to:
 
-Display the <Tooltip tip="Embeddable front-end component where your Users can select Source Systems, authenticate, and share data with your application">Agave Link</Tooltip>
+- Display the <Tooltip tip="Embeddable front-end component where your Users can select Source Systems, authenticate, and share data with your application">Agave Link</Tooltip>
  front-end component in your application’s interface
-Get an access token when your Users log into a Agave Link
-Retrieve your User’s data from a linked Agave API
+- Get an access token when your Users log into a <Tooltip tip="Third-party software, such as Procore, QuickBooks Online, or ServiceTitan">Agave Link</Tooltip>
+- Retrieve your User’s data from a linked <Tooltip tip="Third-party software, such as Procore, QuickBooks Online, or ServiceTitan">Agave API</Tooltip>
+
+### Step 1: Get Client Id and Secret
+
+Email us at api-support@agaveapi.com to get a Client Id and Client Secret.
+
+<Card title="Danger" icon="fire" href="/components/card-group">
+  Never include your Client Secret in your source code or send it to the front-end. If you believe your Secret has been compromised, please contact us immediately at security@agaveapi.com.
+  If you need to enable your front-end single-page app to make API calls independent of your backend, consider using a temporary, limited-in-scope link session instead.
+</Card>
+
+### Step 2: Generate Link Token
+
+Once you have a Client Id and Client Secret, you can generate a `link_token`. The `link_token` is a short-lived, single-use token used to authenticate your app with <Tooltip tip="Embeddable front-end component where your Users can select Source Systems, authenticate, and share data with your application">Agave Link</Tooltip>.
+
+**Request**
+
+```curl curl
+     --request POST https://api.agaveapi.com/link/token/create \
+     --header 'API-Version: 2021-11-21' \
+     --header 'Client-Id: your_client_id' \
+     --header 'Client-Secret: your_client_secret' \
+     --data-raw '{
+          "reference_id": "user_id_in_your_app"
+        }'
+```
+
+You should use a User's ID (e.g. a username) in your application as the `reference_id` parameter. Using a User's ID will enable you to track which integrations your customers have enabled. For purposes of getting started, you can use `"user_id_in_your_app"` as your parameter. To learn more, see Reference ID.
+
+**Response**
+
+```
+{
+  "link_token":"wChY253uBfrP0bBGB9fymMXMSp0auub5RmmFR33c"
+}
+```
+
+### Step 3: Serve Agave Link
+
+You can initialize <Tooltip tip="Embeddable front-end component where your users select systems, authenticate, and share data with you.">Source Systems</Tooltip> and generate a short-lived public_token every login.
+
+<CodeGroup>
+
+```html HTML
+<button id="open-link-button">
+  Connect Your Account
+</button>
+<div id="message">
+  &larr; Please update the link token from the previous step on line 11.
+</div>
+
+<script src="https://app.agaveapi.com/init.js"></script>
+
+<script type="text/javascript">
+  const linkToken = "link_token_from_previous_step";
+
+  const button = document.getElementById("open-link-button");
+  button.addEventListener("click", function () {
+    const messageEl = document.getElementById("message");
+    if (!linkToken || linkToken.length !== 40) {
+      messageEl.innerText = "Invalid link token (check line 11)";
+      return;
+    }
+    
+    window.AgaveLink.openLink({
+      linkToken: linkToken,
+      showSandboxSourceSystems: true,
+
+      onSuccess: (public_token) => {
+        messageEl.innerText = "Public token: " + public_token;
+      },
+
+      onExit: (error) => {
+        console.error(error)
+      }
+    });
+  });
+</script>
+```
+
+```scss SCSS
+body {
+  padding: 20px;
+}
+```
+
+</CodeGroup>
+
+### Step 4: Get Account Token
+
+You can use the `public_token` returned in Step 3 to retrieve an `account_token`. The `account_token` is a permanent token that can be used to authorize User requests to <Tooltip tip="Embeddable front-end component where your users select systems, authenticate, and share data with you.">Source Systems</Tooltip>'s.
+
+Note, in the example in Step 3, we display the `public_token` on the webpage for illustrative purposes. In your production environment, you would want to send this `public_token` to Agave to exchange it for an `account_token`. You can then store this `account_token` in your database and use it to access data on behalf of your Users. You should store the `account_token` in a secure location and never expose it to unauthorized actors (e.g. via your source code or front-end).
+
+**Request**
+
+```curl curl
+--request POST https://api.agaveapi.com/link/token/exchange \
+     --header 'API-Version: 2021-11-21' \
+     --header 'Client-Id: your_client_id' \
+     --header 'Client-Secret: your_client_secret' \
+     --data-raw '{
+          "public_token": "public_token_from_agave_link"
+        }'
+```
+
+**Response**
+
+```
+{
+    "reference_id": "user_id_provided_in_step_2",
+    "account_token": "2FwppMpt3cQ3F7vfqQmFrITHJwhxYymtdXw6Uk0n",
+    "status": "linked",
+    "source_system": {
+        "slug": "procore",
+        "name": "Procore"
+    },
+    "linked_company": {
+        "id": "394e28d9-5bea-52fd-b858-1c4366fea8fe",
+        "source_id": "31936",
+        "name": "Sample Company"
+    },
+    "linked_user": {
+        "id": "6586d971-4562-5c82-bccf-2e7b9c968c76",
+        "source_id": "77742",
+        "name": "",
+        "email": "procore-user@company.com"
+    }
+}
+```
+
+To learn more about Steps 2-4, see [Authentication Flow](/agave-link/authentication-flow).
+
+### Step 5: Read and Write Data
+
+Now that you have an `account_token`, a User's account is considered <Tooltip tip="A User's Source System account after they've authenticated using Agave Link">Agave API</Tooltip> for that User.
+
+Here are example API requests you can try for each <Tooltip tip="Third-party software, such as Procore, QuickBooks Online, or ServiceTitan">Source System</Tooltip>:
+
+<Tabs>
+  <Tab title="Aconex">
+    **Request**
+    ```curl curl
+    https://api.agaveapi.com/projects \
+     --header 'API-Version: 2021-11-21' \
+     --header 'Client-Id: your_client_id' \
+     --header 'Client-Secret: your_client_secret' \
+     --header 'Account-Token: any_of_the_account_tokens'
+     ```
+     **Response**
+     ```
+     [{
+    "id": "ee9b53e7-f982-4be6-bc12-75f716d3ee94",
+    "source_id": "12345",
+    "address": {
+        "street_1": "123 Main Street",
+        "street_2": "Unit 1",
+        "city": "AnyTown",
+        "state": "California",
+        "postal_code": "19703",
+        "country": "USA"
+    },
+    "amount": 500000,
+    "completion_date": "2022-01-01",
+    "name": "Test Project-1",
+    "number": A123,
+    "start_date": "2022-01-01",
+    "status": "Active",
+    "type": "Residential",
+    "source_create_time": "2022-01-01T00:00:00.000Z",
+    "source_update_time": "2022-01-01T00:00:00.000Z",
+    "source_data": {
+        "@attributes": {},
+        "CreationDate": "2022-01-01T00:00:000Z",
+        "DeliveryAddressLine": [ ],
+        "DeliveryCity": [ ],
+        "DeliveryCountry": [ ],
+        "DeliveryPostcode": [ ],
+        "DeliveryState": [ ],
+        "FaxNumber": "11235550101",
+        "LogoPath": "/html/logos/aconex-stored/project/123450/2022-01-01-00-00-00-file.jpg",
+        "ProjectOwnerOrganizationId": "1208003047",
+        "ProjectOwnerOrganizationName": "AnyCompany Inc",
+        "PhoneNumber": "11235550100",
+        "PostalAddressLine": [ ],
+        "PostalCity": [ ],
+        "PostalCountry": [ ],
+        "PostalPostcode": [ ],
+        "PostalState": [ ],
+        "ProjectAddressLine": "123 Main Street",
+        "ProjectCity": "AnyTown",
+        "ProjectCode": "A123",
+        "ProjectCountry": "United States",
+        "ProjectDescription": "A description of the project",
+        "ProjectId": "12345",
+        "ProjectName": "Test Project-1",
+        "ProjectPostcode": "19703",
+        "ProjectShortName": "Test Project-1",
+        "ProjectState": "DE",
+        "ProjectType": "Residential",
+        "ProjectValue": "500000.00",
+        "ProjectResponsibilities": [ ],
+        "StartDate": "2022-01-01T00:00:000Z",
+        "StopDate": "2022-01-01T00:00:000Z"
+    }
+}]
+```
+  </Tab>
+  <Tab title="BIM360">
+    **Request**
+    ```curl curl
+    https://api.agaveapi.com/projects \
+     --header 'API-Version: 2021-11-21' \
+     --header 'Client-Id: your_client_id' \
+     --header 'Client-Secret: your_client_secret' \
+     --header 'Account-Token: any_of_the_account_tokens'
+     ```
+     **Response**
+     ```
+     [{
+    "id": "5ef26842-54b2-5a46-a25e-fb3fb945d647",
+    "source_id": "9b465243-3be7-4f54-94c7-45360ca4fc44",
+    "amount": 500000.0,
+    "name": "Test Project-1",
+    "number": "A123",
+    "address": {
+        "city": "AnyTown",
+        "country": "USA",
+        "postal_code": "19703",
+        "state": "Delaware",
+        "street_1": "123 Main Street",
+        "street_2": "Unit 1"
+    },
+    "type": "Stadium/Arena",
+    "status": "Active",
+    "start_date": "2022-01-01",
+    "completion_date": "2023-01-01",
+    "source_create_time": "2022-01-01T00:00:00.000Z",
+    "source_update_time": "2022-01-01T00:00:00.000Z",
+    "source_data": {
+        "path": "https://developer.api.autodesk.com/hq/v1/accounts/{accountId}/projects",
+        "content_type": "application/json",
+        "data": {
+            "id": "9b465243-3be7-4f54-94c7-45360ca4fc44",
+            "account_id": "12345",
+            "name": "Test Project-1",
+            "start_date": "2022-01-01",
+            "end_date": "2023-01-01",
+            "value": 100,
+            "currency": "USD",
+            "status": "active",
+            "job_number": "A123",
+            "address_line_1": "123 Main Street",
+            "address_line_2": "Unit 1",
+            "city": "AnyTown",
+            "state_or_province": "Delaware",
+            "postal_code": "19703",
+            "country": "United States",
+            "business_unit_id": null,
+            "created_at": "2022-01-01T00:00:00.000Z",
+            "updated_at": "2022-01-01T00:00:00.000Z",
+            "project_type": "Stadium/Arena",
+            "timezone": "America/New_York",
+            "language": "en",
+            "construction_type": "New Construction",
+            "contract_type": "Construction Management (CM) at Risk",
+            "last_sign_in": "2022-01-01T00:00:00.000Z"
+         }
+     }
+}]
+```
+  </Tab>
+  <Tab title="Fieldwire">
+    **Request**
+    ```curl curl
+    https://api.agaveapi.com/projects \
+     --header 'API-Version: 2021-11-21' \
+     --header 'Client-Id: your_client_id' \
+     --header 'Client-Secret: your_client_secret' \
+     --header 'Account-Token: any_of_the_account_tokens'
+     ```
+     **Response**
+     ```
+     [{
+    "id": "39e04a85-1b76-5ab3-b9f7-cf7e4c3835a3",
+    "source_id": "c3da50d8-b29e-4265-bef4-176f17a55f95",
+    "amount": null,
+    "name": "Test Project-1",
+    "number": "A123",
+    "address": {
+        "city": "AnyTown",
+        "country": "USA",
+        "postal_code": "19703",
+        "state": "Delaware",
+        "street_1": "123 Main Street",
+        "street_2": "Unit 1"
+    },
+    "type": null,
+    "status": null,
+    "start_date": null,
+    "completion_date": null,
+    "source_create_time": "2022-01-01T00:00:00.000Z",
+    "source_update_time": "2022-01-01T00:00:00.000Z",
+    "source_data": {
+        "path": "https://app.fieldwire.com/api/v3/account/projects",
+        "content_type": "application/json",
+        "data": {
+            "deleted_at": null,
+            "created_at": "2022-01-01T00:00:00.000Z",
+            "updated_at": "2022-01-01T00:00:00.000Z",
+            "resolved_conflict": false,
+            "device_created_at": "2022-01-01T00:00:00.000Z",
+            "device_updated_at": "2022-01-01T00:00:00.000Z",
+            "account_id": 12345,
+            "address": "Claymont, DE 19703, USA",
+            "archived_at": null,
+            "code": "A123",
+            "color": "#F9CD39",
+            "currency": "USD",
+            "default_pm_group_id": null,
+            "has_logo": true,
+            "id": "c3da50d8-b29e-4265-bef4-176f17a55f95",
+            "is_3d_bim_enabled": true,
+            "is_mobile_location_creation_enabled": true,
+            "is_email_notifications_enabled": true,
+            "logo_url": null,
+            "man_power_units": "man-hours",
+            "name": "Test Project-1",
+            "owner_email": "contact@agaveapi.com",
+            "plan_name": "Business",
+            "prompt_effort_on_complete": false,
+            "sheets_limit": null,
+            "time_zone": "Pacific Time (US & Canada)",
+            "is_analytics_enabled": true,
+            "min_api_version": null,
+            "is_pm_enabled": false,
+            "is_field_enabled": true,
+            "is_plan_text_search_enabled": true,
+            "is_premium": true,
+            "is_enterprise": true,
+            "work_week": [
+                true,
+                true,
+                true,
+                true,
+                true,
+                true,
+                true
+            ]
+        }
+    }
+}]
+```
+  </Tab>
+  <Tab title="PlanGrid">
+    **Request**
+    ```curl curl
+    https://api.agaveapi.com/projects \
+     --header 'API-Version: 2021-11-21' \
+     --header 'Client-Id: your_client_id' \
+     --header 'Client-Secret: your_client_secret' \
+     --header 'Account-Token: any_of_the_account_tokens'
+     ```
+     **Response**
+     ```
+     [{
+    "id": "5927af3b-b9b7-53ad-be64-3cc03c46ae83",
+    "source_id": "ba92fd82-2e3a-44c3-afc2-37c3527c9e36",
+    "amount": null,
+    "name": "Test Project-1",
+    "number": null,
+    "address": {
+        "city": "AnyTown",
+        "country": "USA",
+        "postal_code": "19703",
+        "state": "Delaware",
+        "street_1": "123 Main Street",
+        "street_2": "Unit 1"
+    },
+    "type": "Residential",
+    "status": "Active",
+    "start_date": "2022-01-01",
+    "completion_date": "2023-01-01",
+    "source_data": {
+        "path": "https://io.plangrid.com/projects",
+        "content_type": "application/json",
+        "data": {
+            "acs_unified": false,
+            "city": "AnyTown",
+            "country": "USA",
+            "custom_id": "None",
+            "end_date": "2023-01-01",
+            "latitude": null,
+            "longitude": null,
+            "name": "Test Project-1",
+            "organization_id": null,
+            "owner": null,
+            "postal_code": "19703",
+            "region": "Delaware",
+            "start_date": "2022-01-01",
+            "status": "In Progress",
+            "street_1": "123 Main Street",
+            "street_2": "Unit 1",
+            "type": "Residential",
+            "uid": "1a23f456-7e8a-90c1-afc2-34c5678c9e01",
+            "updated_at": "2022-01-01T00:00:00.00000+00:00"
+        }
+    }
+}]
+```
+  </Tab>
+  <Tab title="Procore">
+    **Request**
+    ```curl curl
+     https://api.agaveapi.com/projects \
+     --header 'API-Version: 2021-11-21' \
+     --header 'Client-Id: your_client_id' \
+     --header 'Client-Secret: your_client_secret' \
+     --header 'Account-Token: any_of_the_account_tokens'curl https://api.agaveapi.com/projects \
+     --header 'API-Version: 2021-11-21' \
+     --header 'Client-Id: your_client_id' \
+     --header 'Client-Secret: your_client_secret' \
+     --header 'Account-Token: any_of_the_account_tokens'
+    ```
+    **Response**
+    ```
+    [{
+     "id": "2a4309f7-e913-5998-bb7d-d40e90e78e90",
+     "source_id": "12345",
+     "address": {
+        "street_1": "123 Main Street",
+        "street_2": "Unit 1",
+        "city": "AnyTown",
+        "state": "Delaware",
+        "postal_code": "19703",
+        "country": "US"
+     },
+    "amount": 500000,
+    "completion_date": "2023-01-01",
+    "name": "Test Project-1",
+    "number": A123,
+    "start_date": "2022-01-01",
+    "status": "Active",
+    "type": "Residential",
+    "source_create_time": "2022-01-01T00:00:00.000Z",
+    "source_update_time": "2022-01-01T00:00:00.000Z",
+    "source_data": {
+        "id": 12345,
+        "name": "Test Project-1",
+        "is_demo": false,
+        "parent_job_id": null,
+        "display_name": "Test Project 1",
+        "project_number": "A123",
+        "address": "123 Main Street",
+        "city": "AnyTown",
+        "state_code": "DE",
+        "country_code": "US",
+        "zip": "19703",
+        "county": "New Castle County",
+        "time_zone": "Pacific Time (US & Canada)",
+        "latitude": null,
+        "longitude": null,
+        "stage": "None",
+        "phone": "(123) 555-0100",
+        "created_at": "2022-01-01T00:00:00Z",
+        "updated_at": "2022-01-01T00:00:00Z",
+        "active": true,
+        "origin_id": null,
+        "origin_data": null,
+        "origin_code": null,
+        "owners_project_id": null,
+        "estimated_value": "500000.0",
+        "project_region_id": null,
+        "project_bid_type_id": null,
+        "project_owner_type_id": null,
+        "photo_id": null,
+        "start_date": "2022-01-01",
+        "completion_date": "2023-01-01",
+        "total_value": "500000.0",
+        "accounting_project_number": null,
+        "store_number": null,
+        "designated_market_area": null,
+        "custom_fields": [ ],
+        "company": {
+            "id": 12345,
+            "name": "AnyCompany"
+        }
+    }
+}]
+```
+  </Tab>
+</Tabs>
+
+### More Resources
+
+- For a list of API endpoints Agave supports, check out our [API Reference](https://docs.agaveapi.com/reference).
+- If you have any questions, reach out to api-support@agaveapi.com.
+
+You're all set! We hope you enjoy using Agave.
