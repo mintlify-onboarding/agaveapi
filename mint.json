@@ -1,0 +1,41 @@
+{
+  "name": "Agave",
+  "logo": {
+    "light": "/logo/agave-logo.png",
+    "dark": "/logo/agave-logo.png"
+  },
+  "favicon": "/agave-favicon.png",
+  "colors": {
+    "primary": "#00AC49",
+    "light": "#23EE79",
+    "dark": "#027533"
+  },
+  "topbarCtaButton": {
+    "name": "Get Access",
+    "url": "https://agave.ck.page/get-access"
+  },
+  "topbarLinks": [
+    {
+      "name": "Contact Us",
+      "url": "mailto:contact@agaveapi.com"
+    }
+  ],
+  "anchors": [
+    {
+      "name": "FAQ",
+      "icon": "question",
+      "url": "https://www.agaveapi.com/faq/"
+    }
+  ],
+  "navigation": [
+    {
+      "group": "Introduction",
+      "pages": ["intropage"]
+    }
+  ],
+  "footerSocials":
+    {
+        "twitter": "https://twitter.com/useagave",
+        "linkedin": "https://www.linkedin.com/company/agave-api/"
+    }
+}
