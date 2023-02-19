@@ -31,6 +31,15 @@
     {
       "group": "Introduction",
       "pages": ["intropage"]
+    },
+    {
+      "group": "Agave Link",
+      "pages": [
+        "agave-link/quickstart",
+        "agave-link/authentication-flow",
+        "agave-link/link-component",
+        "agave-link/single-sign-on-solution"
+]
     }
   ],
   "footerSocials":
