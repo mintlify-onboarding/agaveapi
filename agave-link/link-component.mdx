@@ -1,0 +1,215 @@
+---
+title: "Link Component"
+---
+
+### Overview
+
+Using <Tooltip tip="Embeddable front-end component where your Users can select Source Systems, authenticate, and share data with your application">Agave Link</Tooltip> is simple: you only need to install an initialization script and open the component with <Tooltip tip="Third-party software, such as Procore, QuickBooks Online, or ServiceTitan">Source System</Tooltip> that you would like to make available to your Users.
+
+### Installation
+
+**Javascript**
+
+Include the Agave Link initialize script on each page of your site. This script must always be loaded directly from https://app.agaveapi.com/init.js, rather than included in a bundle or hosted by you.
+
+```
+<script src="https://app.agaveapi.com/init.js"></script>
+```
+
+**React Component**
+```
+npm install @agave-api/react-agave-link
+```
+
+Example React app: [react-agave-link-example](https://github.com/agave-api/react-agave-link-example)
+
+**Vue.js Component**
+
+<Info>Interested in a Vue.js component? Let us know at api-support@agaveapi.com!</Info>
+
+### `openLink` Options
+
+After installing the script, you can open Agave Link by invoking `AgaveLink.openLink(options)`. The `options` object has the following structure:
+
+```
+interface OpenLinkConfig {
+    linkToken: string;
+    onSuccess: (publicToken: string) => void;
+    onExit?: (error?: string) => void;
+    showSandboxSourceSystems?: boolean;
+    showProductionSourceSystems?: boolean;
+    sourceSystem?: string[]|string;
+    sourceSystemEnvironment?: string;
+    sourceSystemOptions?: Object;
+    category?: string;
+}
+```
+
+`linkToken`
+> Required.
+
+This is the link token you get after calling `/link/token` (see [Quickstart](/agave-link/quickstart)).
+
+`onSuccess`
+> Required.
+
+A callback function for when a <Tooltip tip="A person with access to a system, likely the end-user of your application">User</Tooltip>
+ has successfully linked their account. This callback takes one argument: `publicToken`.
+
+ `onExit`  
+ > Optional.
+
+ A callback function that is called when either a <Tooltip tip="A person with access to a system, likely the end-user of your application">User</Tooltip> closes the Link popup, or when an uncaught exception is returned (in which case, an `error` string parameter is included).
+
+ `showSandboxSourceSystems`
+ > Optional. Default: `false`.
+
+ A boolean value that, when set to true, displays sandbox Source Systems. You should only use this during development.
+
+Note that not all <Tooltip tip="Third-party software, such as Procore, QuickBooks Online, or ServiceTitan">Source Systems</Tooltip> support sandbox environments. See Sandbox Environments for more information and a list of source systems that support sandbox environments.
+
+`showProductionSourceSystems`
+> Optional. Default: `true`.
+
+A boolean value that, when set to false, hides production <Tooltip tip="Third-party software, such as Procore, QuickBooks Online, or ServiceTitan">Source Systems</Tooltip>. You should only use this during development.
+
+`sourceSystem`
+>Optional. Default: `null`. Possible values: `procore`, `plangrid`, `service-titan`, `quick-books-online`, or other Source Systems returned from the [/link/source-systems](https://docs.agaveapi.com/agave-api/source-systems) endpoint or an array of one or more of the aformentioned values.
+
+Allows you to open Agave Link directly into one or more <Tooltip tip="Third-party software, such as Procore, QuickBooks Online, or ServiceTitan">Source Systems</Tooltip> instead of displaying a full selection screen.
+
+`sourceSystemEnvironment`
+>Optional. Default: `prod`. Possible values: `sandbox` or `prod`.
+
+This parameter is only taken into account when the `sourceSystem` parameter is present. It is useful during development, if you want to directly open a Source Systemin a sandbox environment.
+
+Note that not all Source Systems support sandbox environments. See Sandbox Environments for more information and a list of source systems that support sandbox environments.
+
+`sourceSystemOptions`
+> Optional. Default: `null`. Possible values: A JSON object.
+
+Using this option, you can pass additional options to Agave Link.
+
+Currently, the only option is passing the `company_id` for Procore (see example).
+
+`category`
+> Optional. Default: `null`. Possible values: `accounting`, `construction`, `field-service`, or `hris`.
+
+Allows you to limit the <Tooltip tip="Third-party software, such as Procore, QuickBooks Online, or ServiceTitan">Source Systems</Tooltip>  displayed in the selection screen to a single category (e.g. "construction").
+
+
+### Basic Examples.
+
+<Tabs>
+  <Tab title="Minimal Options">
+    This is the minimal configuration you must pass to the `openLink` function:
+    ```
+    window.AgaveLink.openLink({
+    linkToken: linkToken,
+    onSuccess: (publicToken) => {
+        // Send publicToken to your server
+    }
+});
+```
+
+  </Tab>
+  <Tab title="Show Sandbox Source Systems">
+    This will show sandbox Source Systems in Agave Link. Use this only during local development.
+    ```
+    window.AgaveLink.openLink({
+    linkToken: linkToken,
+    onSuccess: (publicToken) => {
+        // Send publicToken to your server
+    },
+    showSandboxSourceSystems: true
+});
+```
+
+  </Tab>
+  <Tab title="Specific Source Systems">
+    This will open Agave Link directly into ServiceTitan's production environment.
+```
+window.AgaveLink.openLink({
+    linkToken: linkToken,
+    onSuccess: (publicToken) => {
+        // Send publicToken to your server
+    },
+    sourceSystem: 'service-titan'
+});
+```
+  </Tab>
+  <Tab title="Multiple Source Systems">
+    This will only display Source Systems matching the provided array in the selection screen.
+```
+window.AgaveLink.openLink({
+    linkToken: linkToken,
+    onSuccess: (publicToken) => {
+        // Send publicToken to your server
+    },
+    sourceSystem: ['service-titan', 'procore']
+});
+```
+  </Tab>
+  <Tab title="Specific Source Systems (Sandbox)">
+    This will open Agave Link directly into ServiceTitan's sandbox environment.
+```
+window.AgaveLink.openLink({
+    linkToken: linkToken,
+    onSuccess: (publicToken) => {
+        // Send publicToken to your server
+    },
+    sourceSystem: 'service-titan',
+    sourceSystemEnvironment: 'sandbox'
+});
+```
+  </Tab>
+  <Tab title="Specific Category">
+    This will only display accounting Source Systems in the selection screen.
+```
+window.AgaveLink.openLink({
+    linkToken: linkToken,
+    onSuccess: (publicToken) => {
+        // Send publicToken to your server
+    },
+    category: 'accounting'
+});
+```
+  </Tab>
+</Tabs>
+
+### Advanced Examples
+
+<Tabs>
+  <Tab title="Source System Options">
+    This will change the "Select Your Company" screen after the customer has successfully authenticated with Procore. In this example, you can force Agave Link to only display a single Procore company in the list.
+```
+window.AgaveLink.openLink({
+    linkToken: linkToken,
+    onSuccess: (publicToken) => {
+        // Send publicToken to your server
+    },
+    sourceSystem: 'procore',
+    sourceSystemOptions: { 
+        procore: { 
+            company_id: 31936 
+        } 
+    }
+});
+```
+  </Tab>
+</Tabs>
+
+### Troubleshooting
+
+Certain browsers (e.g. Safari) block thrid-party cookies by default. Agave Link uses cookies to protect against CSRF/XSRF and will not work correctly in these browsers.
+
+Agave Link automatically detects this situation and presents your users with instructions to fix the issue.
+
+![](/images/link-1.png)
+
+
+
+
+
+
+
