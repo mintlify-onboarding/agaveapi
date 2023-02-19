@@ -1,0 +1,69 @@
+---
+title: "Single Sign-On (SSO) Solution"
+---
+
+![](/images/sso-1.png)
+![](/images/sso-2.png)
+
+Agave Link can be used as a Single Sign-on (SSO) solution to allow users to login into your system with their existing Procore, Autodesk, and other accounts.
+
+## User Registration
+
+### Step 1: Invoke Agave Link and Get Access Token
+When the end user clicks to login with a 3rd party system, invoke the Agave Link, let them login to the desired system, and get an `account_token`.
+
+![](/images/sso-3.png)
+![](/images/sso-4.png)
+
+### Step 2: Get Email and Account Info
+
+With the `account_token`, you can then call the [/link/account](https://docs.agaveapi.com/reference#tag/link-metadata/operation/getLinkedAccount) endpoint to get email and other metadata like name and company info.
+
+**Request**
+```curl curl
+    https://api.agaveapi.com/link/account \
+     --header 'API-Version: 2021-11-21' \
+     --header 'Client-Id: your_client_id' \
+     --header 'Client-Secret: your_client_secret' \
+     --header 'Account-Token: any_of_the_account_tokens'
+```
+
+**Response**
+```
+{
+  "account_id": "ee9b53e7-f982-4be6-bc12-75f716d3ee94",
+  "linked_company": {
+    "id": "ee9b53e7-f982-4be6-bc12-75f716d3ee94",
+    "source_id": "12345",
+    "name": "Agave construction Inc."
+  },
+  "linked_user": {
+    "id": "ee9b53e7-f982-4be6-bc12-75f716d3ee94",
+    "source_id": "12345",
+    "name": "John Smith",
+    "email": "jsmith@example.com"
+  },
+  "status": "linked",
+  "source_system": {
+    "slug": "procore",
+    "name": "Procore"
+  },
+  "supports_cross_account_uuid": true
+}
+```
+
+### Step 3: Create a New Account
+
+If the email doesn't exist in your database, you can use the account info to create a new account:
+
+- Using `linked_user.email` as email address or username
+-Instead of storing a password, not that it's authenticated via SSO
+- Fill-in other data points as needed
+
+### Step 4: Login the User
+🎉 Then, you can login the user to the account you just created.
+
+## User Login
+Afterwards, when the end user tries to log in again, you can follow step 1 and 2 above.
+
+Then, at step 3, instead of creating a new account, find the existing account in your database by matching `linked_user.email` and log the user in.
