@@ -4,22 +4,37 @@ title: "Authentification Flow"
 
 ### Get Account Token
 
+<div className="flex">
+
+<div>
+
 An `account_token` is a unique token that you can use to make API requests on behalf of a User's <Tooltip tip="A user's system account after they've authenticated via Agave Link">Linked Account</Tooltip>.
 
 1. Make an API request to [/link/token/create](https://docs.agaveapi.com/reference#tag/link-token/operation/createLinkToken) to retrieve a `link_token`.
 
 2. Use the `link_token` to initiate <Tooltip tip="Embeddable front-end component where your Users can select Source Systems, authenticate, and share data with your application">Source System</Tooltip>
-, Agave Link will generate a temporary `public_token`.
+   , Agave Link will generate a temporary `public_token`.
 
 3. Make an API request to [/link/token/exchange](https://docs.agaveapi.com/reference#tag/link-token/operation/exchangeLinkToken) to exchange the `public_token` for a permanent `account_token` and other metadata for the User's <Tooltip tip="A user's system account after they've authenticated via Agave Link">Linked Account</Tooltip>.
 
 4. Store the account_token securely to make future API requests.
 
+</div>
+
 ![](/images/af-1.png)
+
+</div>
 
 ### Use Account Token
 
+<div className="flex">
+
+<div>
+
 With the `account_token`, you can then make API requests on behalf of a User's <Tooltip tip="A user's system account after they've authenticated via Agave Link">Linked Account</Tooltip>.
+
+</div>
 
 ![](/images/af-2.png)
 
+</div>

@@ -1,14 +1,18 @@
 {
   "name": "Agave",
   "logo": {
-    "light": "/logo/agave-logo.png",
-    "dark": "/logo/agave-logo.png"
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg"
   },
   "favicon": "/agave-favicon.png",
   "colors": {
     "primary": "#00AC49",
     "light": "#23EE79",
-    "dark": "#027533"
+    "dark": "#027533",
+    "anchors": {
+      "from": "#00AC49",
+      "to": "#00B1B1"
+    }
   },
   "topbarCtaButton": {
     "name": "Get Access",
@@ -22,15 +26,25 @@
   ],
   "anchors": [
     {
-      "name": "FAQ",
-      "icon": "question",
-      "url": "https://www.agaveapi.com/faq/"
+      "name": "API Reference",
+      "icon": "rectangle-terminal",
+      "url": "https://www.agaveapi.com/integrations"
+    },
+    {
+      "name": "Integrations",
+      "icon": "plug",
+      "url": "https://www.agaveapi.com/integrations"
+    },
+    {
+      "name": "Changelog",
+      "icon": "list-timeline",
+      "url": "https://docs.agaveapi.com/changelog"
     }
   ],
   "navigation": [
     {
-      "group": "Introduction",
-      "pages": ["intropage"]
+      "group": "Home",
+      "pages": ["introduction"]
     },
     {
       "group": "Agave Link",

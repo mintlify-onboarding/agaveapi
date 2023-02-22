@@ -1,22 +1,26 @@
 ---
-title: "Quickstart"
+title: Quickstart
+description: Getting Started with Agave
 ---
 
 This guide explains how to:
 
 - Display the <Tooltip tip="Embeddable front-end component where your Users can select Source Systems, authenticate, and share data with your application">Agave Link</Tooltip>
- front-end component in your application’s interface
+  front-end component in your application's interface
 - Get an access token when your Users log into a <Tooltip tip="Third-party software, such as Procore, QuickBooks Online, or ServiceTitan">Agave Link</Tooltip>
-- Retrieve your User’s data from a linked <Tooltip tip="Third-party software, such as Procore, QuickBooks Online, or ServiceTitan">Agave API</Tooltip>
+- Retrieve your User's data from a linked <Tooltip tip="Third-party software, such as Procore, QuickBooks Online, or ServiceTitan">Agave API</Tooltip>
 
 ### Step 1: Get Client Id and Secret
 
 Email us at api-support@agaveapi.com to get a Client Id and Client Secret.
 
-<Card title="Danger" icon="fire" href="/components/card-group">
-  Never include your Client Secret in your source code or send it to the front-end. If you believe your Secret has been compromised, please contact us immediately at security@agaveapi.com.
-  If you need to enable your front-end single-page app to make API calls independent of your backend, consider using a temporary, limited-in-scope link session instead.
-</Card>
+<Warning>
+  Never include your Client Secret in your source code or send it to the
+  front-end. If you believe your Secret has been compromised, please contact us
+  immediately at security@agaveapi.com. If you need to enable your front-end
+  single-page app to make API calls independent of your backend, consider using
+  a temporary, limited-in-scope link session instead.
+</Warning>
 
 ### Step 2: Generate Link Token
 
@@ -24,8 +28,8 @@ Once you have a Client Id and Client Secret, you can generate a `link_token`. Th
 
 **Request**
 
-```curl curl
-     --request POST https://api.agaveapi.com/link/token/create \
+```bash
+curl --request POST https://api.agaveapi.com/link/token/create \
      --header 'API-Version: 2021-11-21' \
      --header 'Client-Id: your_client_id' \
      --header 'Client-Secret: your_client_secret' \
@@ -38,9 +42,9 @@ You should use a User's ID (e.g. a username) in your application as the `referen
 
 **Response**
 
-```
+```json
 {
-  "link_token":"wChY253uBfrP0bBGB9fymMXMSp0auub5RmmFR33c"
+  "link_token": "wChY253uBfrP0bBGB9fymMXMSp0auub5RmmFR33c"
 }
 ```
 
@@ -48,52 +52,22 @@ You should use a User's ID (e.g. a username) in your application as the `referen
 
 You can initialize <Tooltip tip="Embeddable front-end component where your users select systems, authenticate, and share data with you.">Source Systems</Tooltip> and generate a short-lived public_token every login.
 
-<CodeGroup>
-
-```html HTML
-<button id="open-link-button">
-  Connect Your Account
-</button>
-<div id="message">
-  &larr; Please update the link token from the previous step on line 11.
-</div>
-
-<script src="https://app.agaveapi.com/init.js"></script>
-
-<script type="text/javascript">
-  const linkToken = "link_token_from_previous_step";
-
-  const button = document.getElementById("open-link-button");
-  button.addEventListener("click", function () {
-    const messageEl = document.getElementById("message");
-    if (!linkToken || linkToken.length !== 40) {
-      messageEl.innerText = "Invalid link token (check line 11)";
-      return;
-    }
-    
-    window.AgaveLink.openLink({
-      linkToken: linkToken,
-      showSandboxSourceSystems: true,
-
-      onSuccess: (public_token) => {
-        messageEl.innerText = "Public token: " + public_token;
-      },
-
-      onExit: (error) => {
-        console.error(error)
-      }
-    });
-  });
-</script>
-```
-
-```scss SCSS
-body {
-  padding: 20px;
-}
-```
-
-</CodeGroup>
+<iframe
+  height="400"
+  style={{ width: "100%" }}
+  scrolling="no"
+  title="Agave Link Demo"
+  src="https://codepen.io/moyicat/embed/YzrvybY?default-tab=html%2Cresult&theme-id=light"
+  frameborder="no"
+  loading="lazy"
+  allowtransparency="true"
+  allowfullscreen="true"
+>
+  See the Pen{" "}
+  <a href="https://codepen.io/moyicat/pen/YzrvybY">Agave Link Demo</a> by
+  Samantha Zhang (<a href="https://codepen.io/moyicat">@moyicat</a>) on{" "}
+  <a href="https://codepen.io">CodePen</a>.
+</iframe>
 
 ### Step 4: Get Account Token
 
@@ -103,8 +77,8 @@ Note, in the example in Step 3, we display the `public_token` on the webpage for
 
 **Request**
 
-```curl curl
---request POST https://api.agaveapi.com/link/token/exchange \
+```bash
+curl --request POST https://api.agaveapi.com/link/token/exchange \
      --header 'API-Version: 2021-11-21' \
      --header 'Client-Id: your_client_id' \
      --header 'Client-Secret: your_client_secret' \
@@ -115,26 +89,26 @@ Note, in the example in Step 3, we display the `public_token` on the webpage for
 
 **Response**
 
-```
+```json
 {
-    "reference_id": "user_id_provided_in_step_2",
-    "account_token": "2FwppMpt3cQ3F7vfqQmFrITHJwhxYymtdXw6Uk0n",
-    "status": "linked",
-    "source_system": {
-        "slug": "procore",
-        "name": "Procore"
-    },
-    "linked_company": {
-        "id": "394e28d9-5bea-52fd-b858-1c4366fea8fe",
-        "source_id": "31936",
-        "name": "Sample Company"
-    },
-    "linked_user": {
-        "id": "6586d971-4562-5c82-bccf-2e7b9c968c76",
-        "source_id": "77742",
-        "name": "",
-        "email": "procore-user@company.com"
-    }
+  "reference_id": "user_id_provided_in_step_2",
+  "account_token": "2FwppMpt3cQ3F7vfqQmFrITHJwhxYymtdXw6Uk0n",
+  "status": "linked",
+  "source_system": {
+    "slug": "procore",
+    "name": "Procore"
+  },
+  "linked_company": {
+    "id": "394e28d9-5bea-52fd-b858-1c4366fea8fe",
+    "source_id": "31936",
+    "name": "Sample Company"
+  },
+  "linked_user": {
+    "id": "6586d971-4562-5c82-bccf-2e7b9c968c76",
+    "source_id": "77742",
+    "name": "",
+    "email": "procore-user@company.com"
+  }
 }
 ```
 
@@ -149,15 +123,15 @@ Here are example API requests you can try for each <Tooltip tip="Third-party sof
 <Tabs>
   <Tab title="Aconex">
     **Request**
-    ```curl curl
-    https://api.agaveapi.com/projects \
+    ```bash
+    curl https://api.agaveapi.com/projects \
      --header 'API-Version: 2021-11-21' \
      --header 'Client-Id: your_client_id' \
      --header 'Client-Secret: your_client_secret' \
      --header 'Account-Token: any_of_the_account_tokens'
      ```
      **Response**
-     ```
+     ```json
      [{
     "id": "ee9b53e7-f982-4be6-bc12-75f716d3ee94",
     "source_id": "12345",
@@ -217,15 +191,15 @@ Here are example API requests you can try for each <Tooltip tip="Third-party sof
   </Tab>
   <Tab title="BIM360">
     **Request**
-    ```curl curl
-    https://api.agaveapi.com/projects \
+    ```bash
+    curl https://api.agaveapi.com/projects \
      --header 'API-Version: 2021-11-21' \
      --header 'Client-Id: your_client_id' \
      --header 'Client-Secret: your_client_secret' \
      --header 'Account-Token: any_of_the_account_tokens'
      ```
      **Response**
-     ```
+     ```json
      [{
     "id": "5ef26842-54b2-5a46-a25e-fb3fb945d647",
     "source_id": "9b465243-3be7-4f54-94c7-45360ca4fc44",
@@ -281,15 +255,15 @@ Here are example API requests you can try for each <Tooltip tip="Third-party sof
   </Tab>
   <Tab title="Fieldwire">
     **Request**
-    ```curl curl
-    https://api.agaveapi.com/projects \
+    ```bash
+    curl https://api.agaveapi.com/projects \
      --header 'API-Version: 2021-11-21' \
      --header 'Client-Id: your_client_id' \
      --header 'Client-Secret: your_client_secret' \
      --header 'Account-Token: any_of_the_account_tokens'
      ```
      **Response**
-     ```
+     ```json
      [{
     "id": "39e04a85-1b76-5ab3-b9f7-cf7e4c3835a3",
     "source_id": "c3da50d8-b29e-4265-bef4-176f17a55f95",
@@ -363,15 +337,15 @@ Here are example API requests you can try for each <Tooltip tip="Third-party sof
   </Tab>
   <Tab title="PlanGrid">
     **Request**
-    ```curl curl
-    https://api.agaveapi.com/projects \
-     --header 'API-Version: 2021-11-21' \
-     --header 'Client-Id: your_client_id' \
-     --header 'Client-Secret: your_client_secret' \
-     --header 'Account-Token: any_of_the_account_tokens'
+    ```bash
+    curl https://api.agaveapi.com/projects \
+      --header 'API-Version: 2021-11-21' \
+      --header 'Client-Id: your_client_id' \
+      --header 'Client-Secret: your_client_secret' \
+      --header 'Account-Token: any_of_the_account_tokens'
      ```
      **Response**
-     ```
+     ```json
      [{
     "id": "5927af3b-b9b7-53ad-be64-3cc03c46ae83",
     "source_id": "ba92fd82-2e3a-44c3-afc2-37c3527c9e36",
@@ -420,19 +394,19 @@ Here are example API requests you can try for each <Tooltip tip="Third-party sof
   </Tab>
   <Tab title="Procore">
     **Request**
-    ```curl curl
-     https://api.agaveapi.com/projects \
-     --header 'API-Version: 2021-11-21' \
-     --header 'Client-Id: your_client_id' \
-     --header 'Client-Secret: your_client_secret' \
-     --header 'Account-Token: any_of_the_account_tokens'curl https://api.agaveapi.com/projects \
-     --header 'API-Version: 2021-11-21' \
-     --header 'Client-Id: your_client_id' \
-     --header 'Client-Secret: your_client_secret' \
-     --header 'Account-Token: any_of_the_account_tokens'
+    ```bash
+    curl https://api.agaveapi.com/projects \
+      --header 'API-Version: 2021-11-21' \
+      --header 'Client-Id: your_client_id' \
+      --header 'Client-Secret: your_client_secret' \
+      --header 'Account-Token: any_of_the_account_tokens'curl https://api.agaveapi.com/projects \
+      --header 'API-Version: 2021-11-21' \
+      --header 'Client-Id: your_client_id' \
+      --header 'Client-Secret: your_client_secret' \
+      --header 'Account-Token: any_of_the_account_tokens'
     ```
     **Response**
-    ```
+    ```json
     [{
      "id": "2a4309f7-e913-5998-bb7d-d40e90e78e90",
      "source_id": "12345",
