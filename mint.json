@@ -28,17 +28,17 @@
     {
       "name": "API Reference",
       "icon": "rectangle-terminal",
-      "url": "https://www.agaveapi.com/integrations"
+      "url": "api-reference"
+    },
+    {
+      "name": "Changelog",
+      "icon": "list-timeline",
+      "url": "changelog"
     },
     {
       "name": "Integrations",
       "icon": "plug",
       "url": "https://www.agaveapi.com/integrations"
-    },
-    {
-      "name": "Changelog",
-      "icon": "list-timeline",
-      "url": "https://docs.agaveapi.com/changelog"
     }
   ],
   "navigation": [
@@ -53,7 +53,26 @@
         "agave-link/authentication-flow",
         "agave-link/link-component",
         "agave-link/single-sign-on-solution"
-]
+      ]
+    },
+    {
+      "group": "API Documentation",
+      "pages": ["api-reference/authentication"]
+    },
+    {
+      "group": "Endpoint Examples",
+      "pages": [
+        "api-reference/endpoint/get",
+        "api-reference/endpoint/create",
+        "api-reference/endpoint/update",
+        "api-reference/endpoint/delete"
+      ]
+    },
+    {
+      "group": "Updates in 2023",
+      "pages": [
+        "changelog/feb-2023"
+      ]
     }
   ],
   "footerSocials":
